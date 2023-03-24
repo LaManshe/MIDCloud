@@ -1,4 +1,5 @@
 ﻿using Ardalis.Result;
+using Microsoft.AspNetCore.Http;
 using MIDCloud.GlobalInterfaces.FileSystem;
 using MIDCloud.GlobalInterfaces.Models;
 using MIDCloud.GlobalInterfaces.Users;
@@ -7,7 +8,9 @@ namespace MIDCloud.GlobalInterfaces.Services
 {
     public interface ISystemStorage
     {
-        Result<ITiles> GetTilesOfDirectory(IUser user, string folder);
-        string CreateDirectoryFor(IUser user);
+        ITiles GetTilesOfDirectory(IUser user, string relFolder);
+        string CreateDirectory(IUser user, string relFolder);
+        string CreateDirectoryForNewbee(IUser user, string relFolder);
+        void UploadFiles(IUser user, string relFolder, List<IFormFile> files);
     }
 }

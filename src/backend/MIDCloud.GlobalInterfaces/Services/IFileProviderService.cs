@@ -1,4 +1,5 @@
-﻿using MIDCloud.GlobalInterfaces.FileSystem;
+﻿using Microsoft.AspNetCore.Http;
+using MIDCloud.GlobalInterfaces.FileSystem;
 
 namespace MIDCloud.GlobalInterfaces.Services
 {
@@ -6,5 +7,6 @@ namespace MIDCloud.GlobalInterfaces.Services
     {
         ITiles GetTilesOfDirectory(string path);
         string CreateDirectory(string path);
+        void UploadFiles(string path, List<IFormFile> files);
     }
 }

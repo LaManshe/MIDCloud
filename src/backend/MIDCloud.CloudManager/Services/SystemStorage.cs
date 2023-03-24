@@ -1,8 +1,8 @@
 ﻿using Ardalis.GuardClauses;
 using Ardalis.Result;
 using JetBrains.Annotations;
+using Microsoft.AspNetCore.Http;
 using MIDCloud.GlobalInterfaces.FileSystem;
-using MIDCloud.GlobalInterfaces.Models;
 using MIDCloud.GlobalInterfaces.Services;
 using MIDCloud.GlobalInterfaces.Users;
 
@@ -24,37 +24,71 @@ namespace MIDCloud.CloudManager.Services
             _storagePath = Path.Combine(_appPath, _storageRelPath);
         }
 
-        public string CreateDirectoryFor(IUser user)
+        public string CreateDirectory(IUser user, string relFolder)
         {
-            var folderFullPath = Path.Combine(_storagePath, user.Login);
+            string folderFullPath = GetCorrectFolderPath(user, relFolder);
 
             var result = _fileProvider.CreateDirectory(folderFullPath);
 
             return result;
         }
 
-        public Result<ITiles> GetTilesOfDirectory([NotNull] IUser user, [NotNull] string folder)
+        public string CreateDirectoryForNewbee(IUser user, string relFolder)
         {
-            if (folder == @"/" || folder == @"\")
-            {
-                folder = string.Empty;
-            }
+            var folderFullPath = Path.Combine(_storagePath, relFolder);
 
-            var folderFullPath = Path.Combine(user.RootFolderPath, folder);
+            var result = _fileProvider.CreateDirectory(folderFullPath);
+
+            return result;
+        }
+
+        public ITiles GetTilesOfDirectory([NotNull] IUser user, [NotNull] string relFolder)
+        {
+            var folderFullPath = GetCorrectFolderPath(user, relFolder);
 
             if (user.IsHavePermission(folderFullPath) is false)
             {
-                return Result.Error($"User {user.Login} have not access to this folder");
+                throw new Exception($"User {user.Login} have not access to this folder");
             }
 
             var result = _fileProvider.GetTilesOfDirectory(folderFullPath);
 
             if (result is null)
             {
-                return Result.Error("Can not get access to folder");
+                throw new Exception("Can not get access to folder");
             }
 
-            return Result.Success(result);
+            return result;
+        }
+
+        public void UploadFiles(IUser user, string relFolder, List<IFormFile> files)
+        {
+            var folderFullPath = GetCorrectFolderPath(user, relFolder);
+
+            if (Directory.Exists(folderFullPath) is false)
+            {
+                throw new Exception($"Fodler {folderFullPath} does not exist");
+            }
+
+            if (user.IsHavePermission(folderFullPath) is false)
+            {
+                throw new Exception($"User {user.Login} have not access to this folder");
+            }
+
+            _fileProvider.UploadFiles(folderFullPath, files);
+
+            return;
+        }
+
+        private static string GetCorrectFolderPath(IUser user, string folder)
+        {
+            var paths = folder.Split('\\');
+
+            var folderDestinationPath = Path.Combine(paths);
+
+            var folderFullPath = Path.Combine(user.RootFolderPath, folderDestinationPath);
+
+            return folderFullPath;
         }
     }
 }

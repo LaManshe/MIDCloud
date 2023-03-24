@@ -14,11 +14,11 @@ namespace MIDCloud.FileManager.Models
 
             foreach (var folder in folders)
             {
-                Folders.Add(new Folder(folder));
+                Folders.Add(new Folder(Path.GetFileName(folder)));
             }
             foreach (var file in files)
             {
-                Files.Add(new File(file));
+                Files.Add(new File(Path.GetFileName(file)));
             }
         }
     }
