@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/launchsettings.json",
   "iisSettings": {
     "iisExpress": {
-      "applicationUrl": "http://localhost:20024",
+      "applicationUrl": "http://192.168.0.101:5000",
       "sslPort": 0
     }
   },
@@ -12,7 +12,7 @@
       "dotnetRunMessages": true,
       "launchBrowser": false,
       "launchUrl": "api/files",
-      "applicationUrl": "http://localhost:5127",
+      "applicationUrl": "http://192.168.0.101:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

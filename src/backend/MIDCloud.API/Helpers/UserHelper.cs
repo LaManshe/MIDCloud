@@ -12,7 +12,7 @@ namespace MIDCloud.API.Helpers
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
-            var key = Encoding.ASCII.GetBytes(configuration["Secret"]);
+            var key = Encoding.ASCII.GetBytes(configuration["Secret"] ?? string.Empty);
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

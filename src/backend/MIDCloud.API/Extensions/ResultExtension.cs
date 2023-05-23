@@ -9,7 +9,7 @@ namespace MIDCloud.API.Extensions
         {
             if (result.Errors.Count() < 2 || args is null)
             {
-                return result.Errors.FirstOrDefault();
+                return result.Errors.FirstOrDefault() ?? string.Empty;
             }
 
             var errorsText = new StringBuilder();

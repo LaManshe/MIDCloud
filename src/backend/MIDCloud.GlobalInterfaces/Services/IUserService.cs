@@ -11,6 +11,7 @@ namespace MIDCloud.GlobalInterfaces.Services
         User AddToDatabase(IUser user);
         bool AddPermissions(IUser user, string folder);
         bool AddPermissionsAsRoot(IUser user, string folder);
+        bool RemovePermissions(IUser user, string folder);
         (string, string) GenerateTokens(IUser user);
     }
 }

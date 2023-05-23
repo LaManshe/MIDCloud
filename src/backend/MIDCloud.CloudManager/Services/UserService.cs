@@ -43,6 +43,20 @@ namespace MIDCloud.CloudManager.Services
             return AddPermissions(user, folder);
         }
 
+        public bool RemovePermissions(IUser user, string folder)
+        {
+            if (user is User userEntity)
+            {
+                userEntity.PermissionsToFolder.Remove(folder);
+
+                _usersRepository.Update(userEntity);
+
+                return true;
+            }
+
+            return false;
+        }
+
         public User AddToDatabase(IUser user)
         {
             //todo: check sames (login f e)
