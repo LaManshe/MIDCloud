@@ -4,11 +4,15 @@ namespace MIDCloud.FileManager.Models
 {
     internal class Folder : IFolder
     {
+        private readonly string _path;
+
         public string Name { get; set; }
 
-        public Folder(string name)
+        public Folder(string path)
         {
-            Name = name;
+            _path = path;
+
+            Name = Path.GetFileName(_path);
         }
     }
 }

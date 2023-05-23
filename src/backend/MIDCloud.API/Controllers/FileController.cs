@@ -1,159 +1,81 @@
-﻿using Ardalis.GuardClauses;
+using Ardalis.GuardClauses;
 using Microsoft.AspNetCore.Mvc;
 using MIDCloud.API.Extensions;
-using MIDCloud.API.Models.ResponseModels;
 using MIDCloud.API.Helpers;
+using MIDCloud.API.Models.ResponseModels;
 using MIDCloud.GlobalInterfaces.Services;
 
-namespace MIDCloud.API.Controllers
+namespace MIDCloud.API.Controllers;
+
+[Authorize]
+[ApiController]
+[Route("api/file")]
+public class FileController: ControllerBase
 {
-    [Authorize]
-    [ApiController]
-    [Route("api/files")]
-    public class FileController : ControllerBase
+    private readonly ICloudManager _cloudManager;
+
+    public FileController(ICloudManager cloudManager)
     {
-        private readonly ICloudManager _cloudManager;
+        _cloudManager = Guard.Against.Null(cloudManager, nameof(cloudManager));
+    }
+    
+    public IActionResult GetFile(string fileName, string path)
+    {
+        var registeredUser = HttpContext.GetRequesterUser();
 
-        public FileController(ICloudManager cloudManager)
+        if (registeredUser is null)
         {
-            _cloudManager = Guard.Against.Null(cloudManager, nameof(cloudManager));
+            return BadRequest(new ResponseErrorModel("You need to use Basic Authentification with Login and Password to enable this feature"));
         }
 
-        [HttpGet]
-        public IActionResult Get(string path)
+        var result = _cloudManager.GetFile(registeredUser, fileName, path);
+
+        if (result.IsSuccess is false)
         {
-            var registeredUser = HttpContext.GetRequesterUser();
-
-            if (registeredUser is null)
-            {
-                return BadRequest(new ResponseErrorModel(
-                    "You need to use Authentification with token to enable this feature"));
-            }
-
-            var tilesResult = _cloudManager.SystemStorage.GetTilesOfDirectory(registeredUser, path);
-
-            //var filesFromFolderResult = _cloudManager.GetTiles(string.Empty, registeredUser);
-
-            if (tilesResult.IsSuccess is false)
-            {
-                return BadRequest(new ResponseErrorModel(
-                    tilesResult.ConcatErrors()));
-            }
-
-            return Ok(tilesResult.Value);
+            return BadRequest(new ResponseErrorModel(
+                result.ConcatErrors()));
         }
 
+        return Ok(result.Value);
+    }
+    
+    [HttpGet("get-video")]
+    public IActionResult GetVideoStream(string fileName, string path)
+    {
+        var registeredUser = HttpContext.GetRequesterUser();
 
+        if (registeredUser is null)
+        {
+            return BadRequest(new ResponseErrorModel("You need to use Basic Authentification with Login and Password to enable this feature"));
+        }
 
+        var videoFilePathResult = _cloudManager.GetVideoFilePath(registeredUser, fileName, path);
+            
+        if (videoFilePathResult.IsSuccess is false)
+        {
+            return BadRequest(new ResponseErrorModel(videoFilePathResult.ConcatErrors()));
+        }
 
+        return PhysicalFile(videoFilePathResult.Value, "application/octet-stream", enableRangeProcessing: true);
+    }
 
+    [HttpPost("rename")]
+    public IActionResult Rename(string fileName, string newName, string path)
+    {
+        var registeredUser = HttpContext.GetRequesterUser();
 
+        if (registeredUser is null)
+        {
+            return BadRequest(new ResponseErrorModel("You need to use Basic Authentification with Login and Password to enable this feature"));
+        }
 
+        var renameFileResult = _cloudManager.RenameFile(registeredUser, fileName, newName, path);
+        
+        if (renameFileResult.IsSuccess is false)
+        {
+            return BadRequest(new ResponseErrorModel(renameFileResult.ConcatErrors()));
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        //[HttpPost("upload")]
-        //public IActionResult Upload([FromForm] UploadFilesModel uploadModel)
-        //{
-        //    var files = uploadModel.Files;
-        //    var folder = uploadModel.Folder;
-
-        //    if (files is null || files.Any() is false)
-        //    {
-        //        return BadRequest(new ResponseErrorModel("No files upload"));
-        //    }
-
-        //    var registeredUser = HttpContext.GetRequesterUser();
-
-        //    if (registeredUser is null)
-        //    {
-        //        return BadRequest(new ResponseErrorModel("You need to use Basic Authentification with Login and Password to enable this feature"));
-        //    }
-
-        //    if (Directory.Exists(registeredUser.RootFolderPath) is false)
-        //    {
-        //        return BadRequest(new ResponseErrorModel("Your storage is not exist"));
-        //    }
-
-        //    var result = _cloudManager.UploadFilesToFolder(files, folder, registeredUser);
-
-        //    if (result.IsSuccess is false)
-        //    {
-        //        return BadRequest(new ResponseErrorModel(result.ConcatErrors()));
-        //    }
-
-        //    return Ok();
-        //}
-
-        //[HttpPost("create-folder")]
-        //public IActionResult CreateFolder([FromForm] string folderPath)
-        //{
-        //    var registeredUser = HttpContext.GetRequesterUser();
-
-        //    if (registeredUser is null)
-        //    {
-        //        return BadRequest(new ResponseErrorModel("You need to use Basic Authentification with Login and Password to enable this feature"));
-        //    }
-
-        //    var result = _cloudManager.CreateFolder(folderPath, registeredUser);
-
-        //    if (result.IsSuccess is false)
-        //    {
-        //        return BadRequest(result.ConcatErrors());
-        //    }
-
-        //    return Ok(result.Value);
-        //}
-
-        //[HttpPost("delete-folder")]
-        //public IActionResult DeleteFolder([FromForm] string folderPath)
-        //{
-        //    var registeredUser = HttpContext.GetRequesterUser();
-
-        //    if (registeredUser is null)
-        //    {
-        //        return BadRequest(new ResponseErrorModel("You need to use Basic Authentification with Login and Password to enable this feature"));
-        //    }
-
-        //    var resultDeletingFolder = _cloudManager.DeleteFolder(folderPath, registeredUser);
-
-        //    if (resultDeletingFolder.IsSuccess is false)
-        //    {
-        //        return BadRequest(new ResponseErrorModel(resultDeletingFolder.ConcatErrors()));
-        //    }
-
-        //    return Ok(resultDeletingFolder.Value);
-        //}
+        return Ok();
     }
 }
- 

@@ -1,10 +1,11 @@
-﻿ using DAL.Interfaces;
+﻿
 using Microsoft.IdentityModel.Tokens;
 using MIDCloud.API.Services.Interfaces;
 using MIDCloud.GlobalInterfaces.Services;
 using MIDCloud.GlobalInterfaces.Users;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using IUserService = MIDCloud.GlobalInterfaces.Services.IUserService;
 
 namespace MIDCloud.API.Helpers
 {
@@ -12,7 +13,6 @@ namespace MIDCloud.API.Helpers
     {
         private readonly RequestDelegate _next;
         private readonly IConfiguration _configuration;
-        //private readonly ILogger _logger;
 
         public JwtMiddleware(RequestDelegate next, IConfiguration configuration)
         {
@@ -20,17 +20,17 @@ namespace MIDCloud.API.Helpers
             _configuration = configuration;
         }
 
-        public async Task Invoke(HttpContext context, ICloudManager cloudManager)
+        public async Task Invoke(HttpContext context, IUserService userService)
         {
             var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
             if (token != null)
-                AttachUserToContext(context, cloudManager, token);
+                AttachUserToContext(context, userService, token);
 
             await _next(context);
         }
 
-        public void AttachUserToContext(HttpContext context, ICloudManager cloudManager, string token)
+        public void AttachUserToContext(HttpContext context, IUserService userService, string token)
         {
             try
             {
@@ -51,7 +51,7 @@ namespace MIDCloud.API.Helpers
 
                 var userId = int.Parse(jwtToken.Claims.First(x => x.Type == "id").Value);
 
-                context.Items[nameof(IUser)] = cloudManager.UserService.Get(userId);
+                context.Items[nameof(IUser)] = userService.Get(userId);
             }
             catch
             {

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.Features;
 using MIDCloud.API.Extensions;
 using MIDCloud.API.Helpers;
 
@@ -20,11 +21,25 @@ internal class Program
         builder.Services.AddServices();
 
         builder.Services.AddCors(options =>
-            options.AddPolicy("AllowSpecificOrigins", builder => builder.WithOrigins("http://localhost:3000/")
+            options.AddPolicy("AllowSpecificOrigins", builder => builder.WithOrigins("http://192.168.0.101:3000")
+                                                                        .WithOrigins("http://localhost:3000")
+                                                                        .AllowCredentials()
                                                                         .AllowAnyHeader()
                                                                         .AllowAnyMethod()
-                                                                        .SetIsOriginAllowed(_ => true)
-                                                                        .AllowCredentials()));
+                                                                        .SetIsOriginAllowedToAllowWildcardSubdomains()
+                                                                        .WithExposedHeaders("Authorization")
+                                                                        .WithExposedHeaders("max-page")));
+
+        builder.Services.Configure<FormOptions>(options =>
+        {
+            options.MultipartBodyLengthLimit = 1073741824;
+        });
+
+        builder.Services.AddLogging(loggingBuilder =>
+        {
+            loggingBuilder.AddDebug();
+            loggingBuilder.AddConsole();
+        });
 
         var app = builder.Build();
 

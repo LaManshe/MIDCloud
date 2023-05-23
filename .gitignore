@@ -361,3 +361,8 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/src/frontend/
+
+#Custom
+src/backend/MIDCloud.API/data/
+src/frontend/

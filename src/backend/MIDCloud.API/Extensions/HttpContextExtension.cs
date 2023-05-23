@@ -1,10 +1,12 @@
-﻿using MIDCloud.GlobalInterfaces.Users;
+﻿using Ardalis.GuardClauses;
+using JetBrains.Annotations;
+using MIDCloud.GlobalInterfaces.Users;
 
 namespace MIDCloud.API.Extensions
 {
     public static class HttpContextExtension
     {
-        public static IUser GetRequesterUser(this HttpContext context)
+        public static IUser? GetRequesterUser(this HttpContext context)
         {
             if (context.Items[nameof(IUser)] is IUser registeredUser)
             {
@@ -22,6 +24,13 @@ namespace MIDCloud.API.Extensions
                 SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddDays(30)
             });
+        }
+
+        public static void SetResponseMaxPageHeader(this HttpResponse response, string value)
+        {
+            Guard.Against.NullOrEmpty(value, nameof(value));
+
+            response.Headers.Add("max-page", value);
         }
     }
 }
