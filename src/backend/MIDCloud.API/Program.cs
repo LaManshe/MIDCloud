@@ -3,6 +3,7 @@ using MIDCloud.API.Helpers;
 
 internal class Program
 {
+    //test
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
